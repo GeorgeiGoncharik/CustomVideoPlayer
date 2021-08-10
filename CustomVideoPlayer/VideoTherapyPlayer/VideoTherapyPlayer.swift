@@ -4,9 +4,16 @@ import AVFoundation
 protocol VideoTherapyPlayerDelegate: AnyObject {
     func refreshAfterRestart(with player: AVPlayer)
     func setUpTimeline(with item: AVPlayerItem)
+    func updateTimeline(with time: CMTime)
 }
 
 final class VideoTherapyPlayer: VideoTherapyPlayerProtocol {
+    
+    struct Constants {
+        static let periodicObservationInterval = CMTime(seconds: 0.5,
+                                                        preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+    }
+    
     var rate: PlaybackRates {
         didSet {
             if(isPlaying) {
@@ -23,11 +30,16 @@ final class VideoTherapyPlayer: VideoTherapyPlayerProtocol {
     private(set) var avPlayer: AVPlayer
     private var playerStatusObserver: NSKeyValueObservation?
     private var playerItemStatusObserver: NSKeyValueObservation?
+    private var periodicTimeObserver: Any?
     
     init() {
         avPlayer = AVPlayer()
         rate = .one
         registerObservers()
+    }
+    
+    deinit {
+        unregisterObservers()
     }
     
     func configure(with url: URL) {
@@ -55,6 +67,7 @@ fileprivate extension VideoTherapyPlayer {
         unregisterObservers()
         registerPlayerObserver()
         registerPlayerItemObserver()
+        registerPeriodicTimeObserver()
     }
     
     private func registerPlayerObserver() {
@@ -91,12 +104,21 @@ fileprivate extension VideoTherapyPlayer {
         })
     }
     
+    private func registerPeriodicTimeObserver() {
+        periodicTimeObserver = avPlayer.addPeriodicTimeObserver(forInterval: Constants.periodicObservationInterval,
+                                                                queue: .main) { [weak self] time in
+            self?.delegate?.updateTimeline(with: time)
+        }
+    }
+    
     private func unregisterObservers() {
         playerStatusObserver?.invalidate()
         playerStatusObserver = nil
         
         playerItemStatusObserver?.invalidate()
         playerItemStatusObserver = nil
+        
+        periodicTimeObserver = nil
     }
 }
 

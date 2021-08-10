@@ -59,7 +59,7 @@ class VideoTherapyPlayerView: UIView {
     }
     
     private func setUpSlider() {
-        timelineSlider.addTarget(self, action: #selector(sliderValueDidChange(sender:)), for: .valueChanged)
+        timelineSlider.addTarget(self, action: #selector(sliderValueDidChange(sender:event:)), for: .valueChanged)
         addSubview(timelineSlider)
         timelineSlider.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -144,14 +144,32 @@ class VideoTherapyPlayerView: UIView {
         delegate?.didTapBackgroundMusicButton()
     }
     
-    @objc private func sliderValueDidChange(sender: UISlider) {
-        let newTime = CMTime(seconds: Double(sender.value),
-                             preferredTimescale: 10000000)
-        player.seek(to: newTime)
+    @objc private func sliderValueDidChange(sender: UISlider, event: UIEvent) {
+        guard let touch = event.allTouches?.first else {
+            return
+        }
+        switch touch.phase {
+        case .began:
+            player.pause()
+        case .moved:
+            let newTime = CMTime(seconds: Double(sender.value),
+                                 preferredTimescale: player.avPlayer.currentTime().timescale)
+            player.seek(to: newTime)
+        case .ended:
+            player.play()
+        default:
+            break
+        }
    }
 }
 
 extension VideoTherapyPlayerView: VideoTherapyPlayerDelegate {
+    func updateTimeline(with time: CMTime) {
+        if !timelineSlider.isTracking {
+            timelineSlider.value = Float(time.seconds)
+        }
+    }
+    
     func setUpTimeline(with item: AVPlayerItem) {
         timelineSlider.minimumValue = 0.0
         timelineSlider.maximumValue = Float(item.duration.seconds)
