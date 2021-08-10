@@ -9,21 +9,31 @@
 /* Begin PBXBuildFile section */
 		043A3C7826BDADC200748E3B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043A3C7726BDADC200748E3B /* AppDelegate.swift */; };
 		043A3C7A26BDADC200748E3B /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043A3C7926BDADC200748E3B /* SceneDelegate.swift */; };
-		043A3C7C26BDADC200748E3B /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043A3C7B26BDADC200748E3B /* ViewController.swift */; };
-		043A3C7F26BDADC200748E3B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 043A3C7D26BDADC200748E3B /* Main.storyboard */; };
+		043A3C7C26BDADC200748E3B /* VideoTherapyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043A3C7B26BDADC200748E3B /* VideoTherapyViewController.swift */; };
 		043A3C8126BDADC500748E3B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 043A3C8026BDADC500748E3B /* Assets.xcassets */; };
 		043A3C8426BDADC500748E3B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 043A3C8226BDADC500748E3B /* LaunchScreen.storyboard */; };
+		043A3C8C26BDAF4D00748E3B /* VideoTherapyPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043A3C8B26BDAF4D00748E3B /* VideoTherapyPlayerView.swift */; };
+		043A3C8F26BF0BEF00748E3B /* VideoTherapyPlayerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043A3C8E26BF0BEF00748E3B /* VideoTherapyPlayerProtocol.swift */; };
+		043A3C9226BF0EDD00748E3B /* PlaybackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043A3C9126BF0EDD00748E3B /* PlaybackButton.swift */; };
+		043A3C9426C1829900748E3B /* VideoTherapyPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043A3C9326C1829900748E3B /* VideoTherapyPlayer.swift */; };
+		043A3C9626C1DA6A00748E3B /* TimelineSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043A3C9526C1DA6900748E3B /* TimelineSlider.swift */; };
+		043A3C9926C1DD7400748E3B /* VideoTherapyViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043A3C9826C1DD7400748E3B /* VideoTherapyViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		043A3C7426BDADC200748E3B /* CustomVideoPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CustomVideoPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		043A3C7726BDADC200748E3B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		043A3C7926BDADC200748E3B /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		043A3C7B26BDADC200748E3B /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		043A3C7E26BDADC200748E3B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		043A3C7B26BDADC200748E3B /* VideoTherapyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTherapyViewController.swift; sourceTree = "<group>"; };
 		043A3C8026BDADC500748E3B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		043A3C8326BDADC500748E3B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		043A3C8526BDADC500748E3B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		043A3C8B26BDAF4D00748E3B /* VideoTherapyPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTherapyPlayerView.swift; sourceTree = "<group>"; };
+		043A3C8E26BF0BEF00748E3B /* VideoTherapyPlayerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTherapyPlayerProtocol.swift; sourceTree = "<group>"; };
+		043A3C9126BF0EDD00748E3B /* PlaybackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackButton.swift; sourceTree = "<group>"; };
+		043A3C9326C1829900748E3B /* VideoTherapyPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTherapyPlayer.swift; sourceTree = "<group>"; };
+		043A3C9526C1DA6900748E3B /* TimelineSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineSlider.swift; sourceTree = "<group>"; };
+		043A3C9826C1DD7400748E3B /* VideoTherapyViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTherapyViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,15 +66,44 @@
 		043A3C7626BDADC200748E3B /* CustomVideoPlayer */ = {
 			isa = PBXGroup;
 			children = (
+				043A3C9726C1DD4100748E3B /* VideoTherapyModule */,
+				043A3C8D26BF0BCD00748E3B /* VideoTherapyPlayer */,
 				043A3C7726BDADC200748E3B /* AppDelegate.swift */,
 				043A3C7926BDADC200748E3B /* SceneDelegate.swift */,
-				043A3C7B26BDADC200748E3B /* ViewController.swift */,
-				043A3C7D26BDADC200748E3B /* Main.storyboard */,
 				043A3C8026BDADC500748E3B /* Assets.xcassets */,
 				043A3C8226BDADC500748E3B /* LaunchScreen.storyboard */,
 				043A3C8526BDADC500748E3B /* Info.plist */,
 			);
 			path = CustomVideoPlayer;
+			sourceTree = "<group>";
+		};
+		043A3C8D26BF0BCD00748E3B /* VideoTherapyPlayer */ = {
+			isa = PBXGroup;
+			children = (
+				043A3C9026BF0E9800748E3B /* SubModules */,
+				043A3C8B26BDAF4D00748E3B /* VideoTherapyPlayerView.swift */,
+				043A3C8E26BF0BEF00748E3B /* VideoTherapyPlayerProtocol.swift */,
+				043A3C9326C1829900748E3B /* VideoTherapyPlayer.swift */,
+			);
+			path = VideoTherapyPlayer;
+			sourceTree = "<group>";
+		};
+		043A3C9026BF0E9800748E3B /* SubModules */ = {
+			isa = PBXGroup;
+			children = (
+				043A3C9126BF0EDD00748E3B /* PlaybackButton.swift */,
+				043A3C9526C1DA6900748E3B /* TimelineSlider.swift */,
+			);
+			path = SubModules;
+			sourceTree = "<group>";
+		};
+		043A3C9726C1DD4100748E3B /* VideoTherapyModule */ = {
+			isa = PBXGroup;
+			children = (
+				043A3C7B26BDADC200748E3B /* VideoTherapyViewController.swift */,
+				043A3C9826C1DD7400748E3B /* VideoTherapyViewModel.swift */,
+			);
+			path = VideoTherapyModule;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -126,7 +165,6 @@
 			files = (
 				043A3C8426BDADC500748E3B /* LaunchScreen.storyboard in Resources */,
 				043A3C8126BDADC500748E3B /* Assets.xcassets in Resources */,
-				043A3C7F26BDADC200748E3B /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -137,23 +175,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				043A3C7C26BDADC200748E3B /* ViewController.swift in Sources */,
+				043A3C9226BF0EDD00748E3B /* PlaybackButton.swift in Sources */,
+				043A3C9626C1DA6A00748E3B /* TimelineSlider.swift in Sources */,
+				043A3C7C26BDADC200748E3B /* VideoTherapyViewController.swift in Sources */,
+				043A3C9426C1829900748E3B /* VideoTherapyPlayer.swift in Sources */,
 				043A3C7826BDADC200748E3B /* AppDelegate.swift in Sources */,
+				043A3C9926C1DD7400748E3B /* VideoTherapyViewModel.swift in Sources */,
 				043A3C7A26BDADC200748E3B /* SceneDelegate.swift in Sources */,
+				043A3C8F26BF0BEF00748E3B /* VideoTherapyPlayerProtocol.swift in Sources */,
+				043A3C8C26BDAF4D00748E3B /* VideoTherapyPlayerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		043A3C7D26BDADC200748E3B /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				043A3C7E26BDADC200748E3B /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		043A3C8226BDADC500748E3B /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (

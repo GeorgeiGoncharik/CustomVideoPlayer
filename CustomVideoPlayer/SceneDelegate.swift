@@ -1,22 +1,27 @@
-//
-//  SceneDelegate.swift
-//  CustomVideoPlayer
-//
-//  Created by Mac on 6.08.21.
-//
-
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-
+    var navigationCoordinator: VideoTherapyNavigation?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let _ = (scene as? UIWindowScene) else { return }
+        guard let scene = (scene as? UIWindowScene) else { return }
+        
+        let viewModel = VideoTherapyViewModel()
+        navigationCoordinator = TherapyCoordinator()
+        viewModel.navigation = navigationCoordinator
+        
+        let viewController = VideoTherapyViewController()
+        viewController.configure(with: viewModel)
+        
+        window = UIWindow(frame: scene.coordinateSpace.bounds)
+        window?.windowScene = scene
+        window?.rootViewController = viewController
+        window?.makeKeyAndVisible()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
