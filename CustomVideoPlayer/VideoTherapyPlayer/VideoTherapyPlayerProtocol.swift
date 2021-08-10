@@ -26,12 +26,3 @@ protocol VideoTherapyPlayerProtocol: AnyObject {
     // переход к вопросу с пропуском видео куска до вопроса (через делегат) !!!
     // таймлайн видео с пометкой мест вопросов (будет во view) high priority
 }
-
-enum PlaybackRates: Float {
-    case zero = 0
-    case one = 1
-    case oneAndQuarter = 1.25
-    case oneAndHalf = 1.5
-    case oneAndThreeQuarters = 1.75
-    case double = 2.0
-}

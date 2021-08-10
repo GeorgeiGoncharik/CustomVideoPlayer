@@ -18,6 +18,8 @@
 		043A3C9426C1829900748E3B /* VideoTherapyPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043A3C9326C1829900748E3B /* VideoTherapyPlayer.swift */; };
 		043A3C9626C1DA6A00748E3B /* TimelineSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043A3C9526C1DA6900748E3B /* TimelineSlider.swift */; };
 		043A3C9926C1DD7400748E3B /* VideoTherapyViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043A3C9826C1DD7400748E3B /* VideoTherapyViewModel.swift */; };
+		043A3C9B26C2EA8700748E3B /* PlaybackRateButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043A3C9A26C2EA8700748E3B /* PlaybackRateButton.swift */; };
+		043A3C9E26C2ECEA00748E3B /* PlaybackRates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043A3C9D26C2ECEA00748E3B /* PlaybackRates.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +36,8 @@
 		043A3C9326C1829900748E3B /* VideoTherapyPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTherapyPlayer.swift; sourceTree = "<group>"; };
 		043A3C9526C1DA6900748E3B /* TimelineSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineSlider.swift; sourceTree = "<group>"; };
 		043A3C9826C1DD7400748E3B /* VideoTherapyViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTherapyViewModel.swift; sourceTree = "<group>"; };
+		043A3C9A26C2EA8700748E3B /* PlaybackRateButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackRateButton.swift; sourceTree = "<group>"; };
+		043A3C9D26C2ECEA00748E3B /* PlaybackRates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackRates.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,8 +95,8 @@
 		043A3C9026BF0E9800748E3B /* SubModules */ = {
 			isa = PBXGroup;
 			children = (
-				043A3C9126BF0EDD00748E3B /* PlaybackButton.swift */,
-				043A3C9526C1DA6900748E3B /* TimelineSlider.swift */,
+				043A3C9C26C2ECDE00748E3B /* Views */,
+				043A3C9D26C2ECEA00748E3B /* PlaybackRates.swift */,
 			);
 			path = SubModules;
 			sourceTree = "<group>";
@@ -104,6 +108,16 @@
 				043A3C9826C1DD7400748E3B /* VideoTherapyViewModel.swift */,
 			);
 			path = VideoTherapyModule;
+			sourceTree = "<group>";
+		};
+		043A3C9C26C2ECDE00748E3B /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				043A3C9126BF0EDD00748E3B /* PlaybackButton.swift */,
+				043A3C9526C1DA6900748E3B /* TimelineSlider.swift */,
+				043A3C9A26C2EA8700748E3B /* PlaybackRateButton.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -177,10 +191,12 @@
 			files = (
 				043A3C9226BF0EDD00748E3B /* PlaybackButton.swift in Sources */,
 				043A3C9626C1DA6A00748E3B /* TimelineSlider.swift in Sources */,
+				043A3C9E26C2ECEA00748E3B /* PlaybackRates.swift in Sources */,
 				043A3C7C26BDADC200748E3B /* VideoTherapyViewController.swift in Sources */,
 				043A3C9426C1829900748E3B /* VideoTherapyPlayer.swift in Sources */,
 				043A3C7826BDADC200748E3B /* AppDelegate.swift in Sources */,
 				043A3C9926C1DD7400748E3B /* VideoTherapyViewModel.swift in Sources */,
+				043A3C9B26C2EA8700748E3B /* PlaybackRateButton.swift in Sources */,
 				043A3C7A26BDADC200748E3B /* SceneDelegate.swift in Sources */,
 				043A3C8F26BF0BEF00748E3B /* VideoTherapyPlayerProtocol.swift in Sources */,
 				043A3C8C26BDAF4D00748E3B /* VideoTherapyPlayerView.swift in Sources */,

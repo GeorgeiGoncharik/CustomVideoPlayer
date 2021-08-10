@@ -24,6 +24,7 @@ class VideoTherapyPlayerView: UIView {
     private var backgroundMusicButton = UIButton()
     // close button
     private var closeButton = UIButton()
+    private var changeRateButton = PlaybackRateButton()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -56,6 +57,7 @@ class VideoTherapyPlayerView: UIView {
         setUpCloseButton()
         setUpBackgroundMusicButton()
         setUpSlider()
+        setUpChangeRateButton()
     }
     
     private func setUpSlider() {
@@ -120,6 +122,17 @@ class VideoTherapyPlayerView: UIView {
             backgroundMusicButton.heightAnchor.constraint(equalTo: backgroundMusicButton.widthAnchor, multiplier: 1.0),
             backgroundMusicButton.topAnchor.constraint(equalTo: self.topAnchor, constant: 16),
             backgroundMusicButton.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16)
+        ])
+    }
+    
+    private func setUpChangeRateButton() {
+        changeRateButton.configure(with: player)
+        addSubview(changeRateButton)
+        changeRateButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            changeRateButton.heightAnchor.constraint(equalTo: changeRateButton.widthAnchor, multiplier: 1.0),
+            changeRateButton.topAnchor.constraint(equalTo: self.topAnchor, constant: 16),
+            changeRateButton.leadingAnchor.constraint(equalTo: self.backgroundMusicButton.trailingAnchor, constant: 16)
         ])
     }
     
