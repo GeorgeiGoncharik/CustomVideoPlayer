@@ -4,6 +4,7 @@ import AVFoundation
 protocol VideoTherapyPlayerViewDelegate: AnyObject {
     func didTapBackgroundMusicButton()
     func didTapCloseTherapyButton()
+    func didReachQuestionMark(_ mark: Int)
 }
 
 class VideoTherapyPlayerView: UIView {
@@ -37,18 +38,7 @@ class VideoTherapyPlayerView: UIView {
     }
     
     private func initView() {
-//        let cmtimes = [
-//            CMTime(seconds: 2.18, preferredTimescale: 100),
-//            CMTime(seconds: 7.0, preferredTimescale: 100),
-//            CMTime(seconds: 11.02, preferredTimescale: 100),
-//            CMTime(seconds: 20.18, preferredTimescale: 100),
-//        ]
-//        let cmtimevalues = cmtimes.map({NSValue(time: $0)})
-//        player?.addBoundaryTimeObserver(forTimes: cmtimevalues, queue: .main, using: { [weak self] in
-//            print(self?.player?.currentTime().seconds)
-//        })
         playerLayer.player = player.avPlayer
-        
         playerLayer.cornerRadius = 20
         playerLayer.masksToBounds = true
         playerLayer.videoGravity = .resize
@@ -144,6 +134,10 @@ class VideoTherapyPlayerView: UIView {
         player.play()
     }
     
+    func set(marks: [Int]) {
+        player.set(marks: marks)
+    }
+    
     @objc private func forwardTapped() {
         player.seek(by: TimeInterval(15))
     }
@@ -166,14 +160,14 @@ class VideoTherapyPlayerView: UIView {
         }
         switch touch.phase {
         case .began:
-            //player.pause()
+            player.pause()
             break
         case .moved:
             let newTime = CMTime(seconds: Double(sender.value),
                                  preferredTimescale: player.avPlayer.currentTime().timescale)
             player.seek(to: newTime)
         case .ended:
-            //player.play()
+            player.play()
             break
         default:
             break
@@ -182,6 +176,11 @@ class VideoTherapyPlayerView: UIView {
 }
 
 extension VideoTherapyPlayerView: VideoTherapyPlayerDelegate {
+    func reachedQuestionMark(mark: Int) {
+        player.pause()
+        delegate?.didReachQuestionMark(mark)
+    }
+    
     func updateTimeline(with time: CMTime) {
         if !timelineSlider.isTracking {
             timelineSlider.value = Float(time.seconds)

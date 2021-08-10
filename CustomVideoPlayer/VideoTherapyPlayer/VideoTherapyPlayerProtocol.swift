@@ -24,5 +24,6 @@ protocol VideoTherapyPlayerProtocol: AnyObject {
     // кнопка включения/выключения фоновой музыки high priority - VideoTherapyPlayerViewDelegate
     // крестик на закрытие сессии (будет во view и логика во VM) high priority - VideoTherapyPlayerViewDelegate
     // переход к вопросу с пропуском видео куска до вопроса (через делегат) !!!
+    func set(marks: [Int])
     // таймлайн видео с пометкой мест вопросов (будет во view) high priority
 }

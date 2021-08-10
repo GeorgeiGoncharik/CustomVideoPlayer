@@ -1,32 +1,33 @@
 import Foundation
 import Combine
 
-//MARK: -Flow mock
-
-class TherapyCoordinator: VideoTherapyNavigation {
-    func finishTherapy() {
-        print("VideoTherapyViewModel called finishTherapy() method. processing some logic here...")
-    }
-}
-
 //MARK: -Video Therapy ViewModel
 
 protocol VideoTherapyNavigation: AnyObject {
     func finishTherapy()
+    func openQuestion(question: String)
 }
 
 class VideoTherapyViewModel {
     weak var navigation: VideoTherapyNavigation?
     var backgroundMusicManager: Bool = true
-    private var model = CurrentValueSubject<URL, Never>(
-        URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")!
+    private var model = CurrentValueSubject<VideoTherapyModel, Never>(
+        VideoTherapyModel(
+            mediaURL: URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")!,
+            questionMarks: [5, 12, 20]
+        )
+        
     )
-    var mediaURL: AnyPublisher<URL, Never> {
+    var mediaURL: AnyPublisher<VideoTherapyModel, Never> {
         model.eraseToAnyPublisher()
     }
 }
 
 extension VideoTherapyViewModel: VideoTherapyPlayerViewDelegate {
+    func didReachQuestionMark(_ mark: Int) {
+        navigation?.openQuestion(question: String(describing: mark))
+    }
+    
     func didTapBackgroundMusicButton() {
         backgroundMusicManager.toggle()
         print(String(describing: backgroundMusicManager))

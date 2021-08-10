@@ -5,6 +5,7 @@ protocol VideoTherapyPlayerDelegate: AnyObject {
     func refreshAfterRestart(with player: AVPlayer)
     func setUpTimeline(with item: AVPlayerItem)
     func updateTimeline(with time: CMTime)
+    func reachedQuestionMark(mark: Int)
 }
 
 final class VideoTherapyPlayer: VideoTherapyPlayerProtocol {
@@ -28,9 +29,11 @@ final class VideoTherapyPlayer: VideoTherapyPlayerProtocol {
     }
     weak var delegate: VideoTherapyPlayerDelegate?
     private(set) var avPlayer: AVPlayer
+    private var questionMarks: [CMTime] = []
     private var playerStatusObserver: NSKeyValueObservation?
     private var playerItemStatusObserver: NSKeyValueObservation?
     private var periodicTimeObserver: Any?
+    private var boundaryTimeObserver: Any?
     
     init() {
         avPlayer = AVPlayer()
@@ -111,6 +114,13 @@ fileprivate extension VideoTherapyPlayer {
         }
     }
     
+    private func registerQuestionMarksObserver() {
+        let values = questionMarks.map { NSValue(time:$0) }
+        boundaryTimeObserver = avPlayer.addBoundaryTimeObserver(forTimes: values, queue: .main) { [weak self] in
+            self?.delegate?.reachedQuestionMark(mark: Int((self?.avPlayer.currentTime().seconds)!))
+        }
+    }
+    
     private func unregisterObservers() {
         playerStatusObserver?.invalidate()
         playerStatusObserver = nil
@@ -119,6 +129,7 @@ fileprivate extension VideoTherapyPlayer {
         playerItemStatusObserver = nil
         
         periodicTimeObserver = nil
+        boundaryTimeObserver = nil
     }
 }
 
@@ -154,5 +165,11 @@ extension VideoTherapyPlayer {
     
     func pause() {
         avPlayer.pause()
+    }
+    
+    func set(marks: [Int]) {
+        let timescale = avPlayer.currentTime().timescale
+        questionMarks = marks.map { CMTime(seconds: Double($0), preferredTimescale: timescale)}
+        registerQuestionMarksObserver()
     }
 }

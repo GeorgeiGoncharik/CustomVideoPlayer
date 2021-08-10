@@ -30,9 +30,10 @@ class VideoTherapyViewController: UIViewController {
     
     private func configureSubscribers() {
         viewModel.mediaURL
-            .sink{ [weak self] url in
-                let item = AVPlayerItem(url: url)
+            .sink{ [weak self] model in
+                let item = AVPlayerItem(url: model.mediaURL)
                 self?.playerView.configure(with: item)
+                self?.playerView.set(marks: model.questionMarks)
             }
             .store(in: &bag)
     }
