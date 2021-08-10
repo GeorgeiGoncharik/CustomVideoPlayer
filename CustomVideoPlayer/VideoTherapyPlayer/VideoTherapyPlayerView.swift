@@ -54,6 +54,7 @@ class VideoTherapyPlayerView: UIView {
         playerLayer.videoGravity = .resize
         
         setUpMainControls()
+        setUpPlaybackButton()
         setUpCloseButton()
         setUpBackgroundMusicButton()
         setUpSlider()
@@ -73,8 +74,6 @@ class VideoTherapyPlayerView: UIView {
     }
     
     private func setUpMainControls() {
-        playbackButton.avPlayer = player.avPlayer
-        
         reverseForwardButton.setImage(UIImage(systemName: "gobackward.15"), for: .normal)
         forwardButton.setImage(UIImage(systemName: "goforward.15"), for: .normal)
         
@@ -136,6 +135,10 @@ class VideoTherapyPlayerView: UIView {
         ])
     }
     
+    private func setUpPlaybackButton() {
+        playbackButton.configure(with: player)
+    }
+    
     func configure(with playerItem: AVPlayerItem) {
         player.configure(with: playerItem)
         player.play()
@@ -163,13 +166,15 @@ class VideoTherapyPlayerView: UIView {
         }
         switch touch.phase {
         case .began:
-            player.pause()
+            //player.pause()
+            break
         case .moved:
             let newTime = CMTime(seconds: Double(sender.value),
                                  preferredTimescale: player.avPlayer.currentTime().timescale)
             player.seek(to: newTime)
         case .ended:
-            player.play()
+            //player.play()
+            break
         default:
             break
         }
@@ -190,6 +195,5 @@ extension VideoTherapyPlayerView: VideoTherapyPlayerDelegate {
     
     func refreshAfterRestart(with player: AVPlayer) {
         playerLayer.player = player
-        playbackButton.avPlayer = player
     }
 }
