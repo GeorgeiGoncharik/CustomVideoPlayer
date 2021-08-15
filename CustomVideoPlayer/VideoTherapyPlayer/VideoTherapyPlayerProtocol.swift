@@ -5,18 +5,18 @@ import AVFoundation
 #warning("Delete comments")
 // Видео проигрыватель. Что в нем должно быть -
 protocol VideoTherapyPlayerProtocol: AnyObject {
-    var avPlayer: AVPlayer {get}
+    var avPlayer: AVQueuePlayer {get}
     var isPlaying: Bool {get}
     var rate: PlaybackRates {get set} // ускорение проигрывания х1.25, х1.5, х1.75, х2
     var delegate: VideoTherapyPlayerDelegate? {get set}
     // настройка плеера
-    func configure(with url: URL)
-    func configure(with item: AVPlayerItem)
+    func configure(with urls: [URL])
     // пауза/плэй high priority
     func play()
     func pause()
+    func togglePlayPause()
     // промотка на 15 секунд вперед и назад
-    func seek(to time: CMTime)
+    func seek(to time: TimeInterval)
     func seek(by offset: TimeInterval)
     // субтитры вкл/вык
     func enableSubtitles()

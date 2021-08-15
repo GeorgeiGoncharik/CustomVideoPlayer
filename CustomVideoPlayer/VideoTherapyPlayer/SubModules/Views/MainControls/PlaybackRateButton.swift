@@ -12,11 +12,7 @@ class PlaybackRateButton: UIButton {
     }
 
     private var rates = PlaybackRates.allCases
-    private var player: VideoTherapyPlayerProtocol! {
-        didSet {
-            updateUI()
-        }
-    }
+    private var player: VideoTherapyPlayerProtocol!
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -37,7 +33,7 @@ class PlaybackRateButton: UIButton {
         updateUI()
     }
     
-    private func updateUI() {
+    func updateUI() {
         setImage(UIImage(systemName: Constants.imageAssets[player.rate] ?? "questionmark.circle"), for: .normal)
     }
 }

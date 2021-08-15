@@ -1,5 +1,4 @@
 import UIKit
-import AVFoundation
 
 class PlaybackButton: UIButton {
     private var player: VideoTherapyPlayerProtocol!
@@ -7,7 +6,6 @@ class PlaybackButton: UIButton {
     override init(frame: CGRect) {
         super.init(frame: frame)
         addTarget(self, action: #selector(onTap), for: .touchUpInside)
-        setImage(UIImage(systemName: "pause"), for: .normal)
     }
     
     required init?(coder: NSCoder) {
@@ -19,12 +17,11 @@ class PlaybackButton: UIButton {
     }
     
     @objc func onTap() {
-        player.isPlaying ? player.pause() : player.play()
-        updateUI()
+        player.togglePlayPause()
     }
     
     func updateUI() {
-        let imageName: String = player.isPlaying ? "pause" : "play"
-        setImage(UIImage(systemName: imageName), for: .normal)
+        let imageName: String = player.isPlaying ? "playback-pause" : "playback-play"
+        setImage(UIImage(named: imageName), for: .normal)
     }
 }

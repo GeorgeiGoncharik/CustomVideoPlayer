@@ -3,9 +3,11 @@ import AVFoundation
 
 protocol VideoTherapyPlayerDelegate: AnyObject {
     func refreshAfterRestart(with player: AVPlayer)
-    func setUpTimeline(with item: AVPlayerItem)
+    func setUpTimeline(with durations: [CMTime])
     func updateTimeline(with time: CMTime)
+    func updateTimeline(with fraction: Double, at index: Int)
     func reachedQuestionMark(mark: Int)
+    func onPlaybackStatusChange()
 }
 
 final class VideoTherapyPlayer: VideoTherapyPlayerProtocol {
@@ -28,15 +30,18 @@ final class VideoTherapyPlayer: VideoTherapyPlayerProtocol {
         }
     }
     weak var delegate: VideoTherapyPlayerDelegate?
-    private(set) var avPlayer: AVPlayer
+    private(set) var avPlayer: AVQueuePlayer
+    private var assets: [AVAsset] = []
     private var questionMarks: [CMTime] = []
     private var playerStatusObserver: NSKeyValueObservation?
     private var playerItemStatusObserver: NSKeyValueObservation?
+    private var playerQueueObserver: NSKeyValueObservation?
+    private var playerPlaybackStatusObserver: NSKeyValueObservation?
     private var periodicTimeObserver: Any?
     private var boundaryTimeObserver: Any?
     
     init() {
-        avPlayer = AVPlayer()
+        avPlayer = AVQueuePlayer()
         rate = .one
         registerObservers()
     }
@@ -45,22 +50,43 @@ final class VideoTherapyPlayer: VideoTherapyPlayerProtocol {
         unregisterObservers()
     }
     
-    func configure(with url: URL) {
-        let playerItem = AVPlayerItem(url: url)
-        configure(with: playerItem)
+    func configure(with urls: [URL]) {
+        assets = urls.map { url in AVAsset(url: url) }
+        setUpPlayerItems()
     }
-    
-    func configure(with item: AVPlayerItem) {
-        avPlayer.replaceCurrentItem(with: item)
-        registerObservers()
-    }
-    
+        
     //MARK: - Private methods
     private func restart() {
-        let currentItem = avPlayer.currentItem
-        avPlayer = AVPlayer(playerItem: currentItem)
-        registerObservers()
+        avPlayer = AVQueuePlayer()
+        setUpPlayerItems()
         delegate?.refreshAfterRestart(with: avPlayer)
+    }
+    
+    private func setUpPlayerItems() {
+        avPlayer.removeAllItems()
+        assets
+            .map { asset in AVPlayerItem(asset: asset) }
+            .forEach { item in avPlayer.insert(item, after: nil) }
+        setUpTimeline()
+        registerObservers()
+    }
+    
+    private func setUpTimeline() {
+        let durations = assets.map { $0.duration }
+        delegate?.setUpTimeline(with: durations)
+    }
+    
+    private func getCurrentItemIndex() -> Int {
+        assets.count - avPlayer.items().count
+    }
+    
+    private func getPlayedTimeBeforeCurrentItem() -> CMTime {
+        let curIndex = getCurrentItemIndex()
+        var playedTime: CMTime = .zero
+        for (index, _) in avPlayer.items().enumerated() where index < curIndex {
+            playedTime = playedTime + assets[index].duration
+        }
+        return playedTime
     }
 }
 
@@ -68,13 +94,15 @@ final class VideoTherapyPlayer: VideoTherapyPlayerProtocol {
 fileprivate extension VideoTherapyPlayer {
     private func registerObservers() {
         unregisterObservers()
-        registerPlayerObserver()
-        registerPlayerItemObserver()
+        registerPlayerStatusObserver()
+        registerPlayerItemStatusObserver()
         registerPeriodicTimeObserver()
+        registerCurrentItemObserver()
+        registerPlaybackStatusObserver()
     }
     
-    private func registerPlayerObserver() {
-        playerStatusObserver = avPlayer.observe(\.status, changeHandler: { [weak self] player, _ in
+    private func registerPlayerStatusObserver() {
+        playerStatusObserver = avPlayer.observe(\.status, options: [.new]) { [weak self] player, _ in
             switch (player.status) {
             case .failed:
                 self?.restart()
@@ -86,17 +114,17 @@ fileprivate extension VideoTherapyPlayer {
             @unknown default:
                 print("player status: [@unknown default]")
             }
-        })
+        }
     }
     
-    private func registerPlayerItemObserver() {
-        playerItemStatusObserver = avPlayer.currentItem?.observe(\.status, changeHandler: { [weak self] item, _ in
+    private func registerPlayerItemStatusObserver() {
+        playerItemStatusObserver = avPlayer.currentItem?.observe(\.status, options: [.new]) { [weak self] item, _ in
             switch (item.status) {
             case .failed:
                 self?.restart()
                 print("playerItem status: [\(String(describing: item.error))]")
             case .readyToPlay:
-                self?.delegate?.setUpTimeline(with: item)
+                #warning("setUpTimeline somewhere else")
                 print("playerItem status: [.readyToPlay]")
                 self?.play()
             case .unknown:
@@ -104,20 +132,41 @@ fileprivate extension VideoTherapyPlayer {
             @unknown default:
                 print("playerItem status: [@unknown default]")
             }
-        })
+        }
     }
     
     private func registerPeriodicTimeObserver() {
         periodicTimeObserver = avPlayer.addPeriodicTimeObserver(forInterval: Constants.periodicObservationInterval,
                                                                 queue: .main) { [weak self] time in
-            self?.delegate?.updateTimeline(with: time)
+            guard let self = self else {
+                return
+            }
+            let timeTotal = self.getPlayedTimeBeforeCurrentItem() + time
+            self.delegate?.updateTimeline(with: timeTotal)
+            let fraction = (time.seconds / self.avPlayer.currentItem!.duration.seconds)
+            let index = self.getCurrentItemIndex()
+            self.delegate?.updateTimeline(with: fraction, at: index)
         }
     }
     
     private func registerQuestionMarksObserver() {
         let values = questionMarks.map { NSValue(time:$0) }
-        boundaryTimeObserver = avPlayer.addBoundaryTimeObserver(forTimes: values, queue: .main) { [weak self] in
+        boundaryTimeObserver = avPlayer.addBoundaryTimeObserver(forTimes: values,
+                                                                queue: .main) { [weak self] in
             self?.delegate?.reachedQuestionMark(mark: Int((self?.avPlayer.currentTime().seconds)!))
+        }
+    }
+    
+    private func registerCurrentItemObserver() {
+        playerQueueObserver = self.avPlayer.observe(\.currentItem, options: [.new]) { [weak self] player, _ in
+            #warning("notify viewModel about next play item")
+        }
+    }
+    
+    private func registerPlaybackStatusObserver()  {
+        self.playerPlaybackStatusObserver = avPlayer.observe(\.timeControlStatus,
+                                                             options: [.new, .old]) { [weak self] _, _ in
+            self?.delegate?.onPlaybackStatusChange()
         }
     }
     
@@ -127,6 +176,12 @@ fileprivate extension VideoTherapyPlayer {
         
         playerItemStatusObserver?.invalidate()
         playerItemStatusObserver = nil
+        
+        playerQueueObserver?.invalidate()
+        playerQueueObserver = nil
+        
+        playerPlaybackStatusObserver?.invalidate()
+        playerPlaybackStatusObserver = nil
         
         periodicTimeObserver = nil
         boundaryTimeObserver = nil
@@ -150,11 +205,22 @@ extension VideoTherapyPlayer {
         let cmOffset = CMTime(seconds: isNegative ? -offset : offset,
                                 preferredTimescale: cmCurrent.timescale)
         let cmTarget = isNegative ? cmCurrent - cmOffset : cmCurrent + cmOffset
-        seek(to: cmTarget)
+        seek(to: cmTarget.seconds)
     }
     
-    func seek(to time: CMTime) {
-        avPlayer.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero)
+    func seek(to time: TimeInterval) {
+        let itemDuration = avPlayer.currentItem?.duration ?? .zero
+        let seekTime = CMTime(seconds: Double(time),
+                             preferredTimescale: avPlayer.currentTime().timescale)
+        let itemSeekTime = seekTime - getPlayedTimeBeforeCurrentItem()
+        var resultTime: CMTime = itemSeekTime
+        if itemSeekTime < .zero {
+            resultTime = .zero
+        }
+        else if itemSeekTime > itemDuration {
+            resultTime = itemDuration
+        }
+        avPlayer.seek(to: resultTime)
     }
 
     func play() {
@@ -165,6 +231,10 @@ extension VideoTherapyPlayer {
     
     func pause() {
         avPlayer.pause()
+    }
+    
+    func togglePlayPause() {
+        isPlaying ? pause() : play()
     }
     
     func set(marks: [Int]) {

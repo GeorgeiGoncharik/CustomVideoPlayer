@@ -14,12 +14,9 @@ class VideoTherapyViewController: UIViewController {
         view.addSubview(playerView)
         playerView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            playerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
-            playerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
-            playerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
-            playerView.heightAnchor.constraint(equalTo: playerView.widthAnchor, multiplier: 9.0/16.0, constant: 0)
+            playerView.heightAnchor.constraint(equalTo: view.heightAnchor),
+            playerView.widthAnchor.constraint(equalTo: view.widthAnchor)
         ])
-        
     }
 
     func configure(with viewModel: VideoTherapyViewModel) {
@@ -31,9 +28,7 @@ class VideoTherapyViewController: UIViewController {
     private func configureSubscribers() {
         viewModel.mediaURL
             .sink{ [weak self] model in
-                let item = AVPlayerItem(url: model.mediaURL)
-                self?.playerView.configure(with: item)
-                self?.playerView.set(marks: model.questionMarks)
+                self?.playerView.configure(with: model.mediaURLs)
             }
             .store(in: &bag)
     }

@@ -13,8 +13,11 @@ class VideoTherapyViewModel {
     var backgroundMusicManager: Bool = true
     private var model = CurrentValueSubject<VideoTherapyModel, Never>(
         VideoTherapyModel(
-            mediaURL: URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")!,
-            questionMarks: [5, 12, 20]
+            mediaURLs: [
+                URL(string: "https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8")!,
+                URL(string: "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8")!,
+                URL(string: "https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8")!
+            ]
         )
         
     )
@@ -24,16 +27,20 @@ class VideoTherapyViewModel {
 }
 
 extension VideoTherapyViewModel: VideoTherapyPlayerViewDelegate {
-    func didReachQuestionMark(_ mark: Int) {
-        navigation?.openQuestion(question: String(describing: mark))
+    func onSwitchToTextTherapy() {
+        
     }
     
-    func didTapBackgroundMusicButton() {
+    func onTextTherapy(after itemIndex: Int) {
+        navigation?.openQuestion(question: String(describing: itemIndex))
+    }
+
+    func onBackgroundMusic() {
         backgroundMusicManager.toggle()
         print(String(describing: backgroundMusicManager))
     }
     
-    func didTapCloseTherapyButton() {
+    func onClose() {
         navigation?.finishTherapy()
     }
 }
