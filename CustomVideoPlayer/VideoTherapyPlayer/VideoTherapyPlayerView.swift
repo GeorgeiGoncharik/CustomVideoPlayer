@@ -20,6 +20,7 @@ class VideoTherapyPlayerView: UIView {
         static let topPadding: CGFloat = 24
         static let mainControlsBottomPadding: CGFloat = 42
         static let animationTime: TimeInterval = 1.0
+        static let smallVeticalPadding: CGFloat = 8.0
     }
     override static var layerClass: AnyClass { AVPlayerLayer.self }
     private var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
@@ -207,15 +208,13 @@ class VideoTherapyPlayerView: UIView {
             closeButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Constants.horizontalPadding)
         ])
     }
-    
-    #warning("change layout")
     private func setUpProgressView() {
         addSubview(timelineView)
         timelineView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             timelineView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: Constants.horizontalPadding),
             timelineView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: -Constants.horizontalPadding),
-            timelineView.bottomAnchor.constraint(equalTo: mainControlsStack.topAnchor, constant: -35)
+            timelineView.bottomAnchor.constraint(equalTo: mainControlsStack.topAnchor, constant: -Constants.smallVeticalPadding)
         ])
     }
     

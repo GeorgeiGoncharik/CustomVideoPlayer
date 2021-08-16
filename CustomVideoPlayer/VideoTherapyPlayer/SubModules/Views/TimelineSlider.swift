@@ -10,6 +10,7 @@ class VideoTherapyTimelineView: UIView {
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.minute, .second]
         formatter.maximumUnitCount = 2
+        formatter.zeroFormattingBehavior = .pad
         formatter.unitsStyle = .positional
         return formatter
     }()
@@ -17,7 +18,7 @@ class VideoTherapyTimelineView: UIView {
     private var currentTime: Double = 0
     private var totalTime: Double = 0
     private var currentItemIndex = -1
-    private var progresses: [VideoTherapyProgressView] = []
+    private var progresses: [VideoTherapySliderView] = []
     private var currentTimeLabel = UILabel()
     private var totalTimeLabel = UILabel()
     private lazy var stack: UIStackView = {
@@ -41,7 +42,7 @@ class VideoTherapyTimelineView: UIView {
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: leadingAnchor),
             stack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            stack.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 2/3)
+            stack.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 2.0/3.0)
         ])
     }
     
@@ -57,14 +58,12 @@ class VideoTherapyTimelineView: UIView {
         NSLayoutConstraint.activate([
             currentTimeLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
             currentTimeLabel.topAnchor.constraint(equalTo: stack.bottomAnchor, constant: Constants.labelSpacing),
-            currentTimeLabel.widthAnchor.constraint(equalTo: currentTimeLabel.heightAnchor,
-                                                    multiplier: 1.5,
-                                                    constant: 30),
+            currentTimeLabel.trailingAnchor.constraint(equalTo: centerXAnchor),
+            currentTimeLabel.bottomAnchor.constraint(equalTo: bottomAnchor),
             totalTimeLabel.trailingAnchor.constraint(equalTo: trailingAnchor),
             totalTimeLabel.topAnchor.constraint(equalTo: stack.bottomAnchor, constant: Constants.labelSpacing),
-            totalTimeLabel.widthAnchor.constraint(equalTo: totalTimeLabel.heightAnchor,
-                                                    multiplier: 1.5,
-                                                    constant: 30)
+            totalTimeLabel.leadingAnchor.constraint(equalTo: centerXAnchor),
+            totalTimeLabel.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
         updateLabels()
     }
@@ -74,11 +73,14 @@ class VideoTherapyTimelineView: UIView {
     }
     
     func configure(with times: [TimeInterval]) {
-        self.times = times
-        self.totalTime = times.reduce(0, { $0 + $1 })
-        for time in times {
-            let progressView = VideoTherapyProgressView()
-            progressView.progress = 0
+        freeStack()
+        let filtered = times.filter { $0 > 0 }
+        self.times = filtered.count > 0 ? filtered : [100.0]
+        self.totalTime = self.times.reduce(0, { $0 + $1 })
+        for time in self.times {
+            let progressView = VideoTherapySliderView()
+            progressView.minimumValue = 0.0
+            progressView.maximumValue = Float(time)
             addSubview(progressView)
             progressView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
@@ -93,8 +95,11 @@ class VideoTherapyTimelineView: UIView {
     }
     
     func updateUI(with progress: Double, at index: Int) {
-        let progressView = progresses[index]
-        progressView.setProgress(Float(progress), animated: true)
+        progresses
+            .filter { $0 != progresses[index] }
+            .forEach { $0.setThumbImage(UIImage(), for: .normal) }
+        progresses[index]
+            .updateUI(with: Float(progress))
         currentTime = (progress * times[index]) + times.prefix(index).reduce(0, +)
         updateLabels()
         if index != currentItemIndex {
@@ -112,6 +117,12 @@ class VideoTherapyTimelineView: UIView {
     private func updateLabels() {
         currentTimeLabel.text = formatter.string(from: currentTime)
         totalTimeLabel.text = formatter.string(from: totalTime)
+    }
+    
+    private func freeStack() {
+        stack.arrangedSubviews.forEach { [weak self] view in
+            self?.stack.removeArrangedSubview(view)
+        }
     }
 }
 
@@ -196,9 +207,11 @@ class VideoTherapySliderView: UISlider {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        minimumTrackTintColor = UIColor(named: "player-progress-secondary")
+        minimumTrackTintColor = UIColor(named: "player-progress-tint")
         maximumTrackTintColor = UIColor(named: "player-progress-secondary")
         tintColor = UIColor(named: "player-progress-tint")
+        setThumbImage(UIImage(), for: .normal)
+        isUserInteractionEnabled = false
         setUpImageView()
     }
     
@@ -214,6 +227,15 @@ class VideoTherapySliderView: UISlider {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func updateUI(with fractionValue: Float) {
+        value = fractionValue * maximumValue
+        if value > minimumValue && value <= maximumValue {
+            setThumbImage(UIImage(named: "slider-thumb"), for: .normal)
+        } else {
+            setThumbImage(UIImage(), for: .normal)
+        }
     }
     
     func hidePin() {
