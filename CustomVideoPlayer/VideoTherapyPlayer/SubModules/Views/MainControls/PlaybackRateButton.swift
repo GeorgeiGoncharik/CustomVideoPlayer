@@ -2,12 +2,13 @@ import UIKit
 
 class PlaybackRateButton: UIButton {
     struct Constants {
+        #warning("add assets")
         static let imageAssets: Dictionary<PlaybackRates, String> = [
-            .one : "a.circle",
-            .oneAndQuarter : "b.circle",
-            .oneAndHalf : "c.circle",
-            .oneAndThreeQuarters : "d.circle",
-            .double : "e.circle"
+            .one : "rate-1.75",
+            .oneAndQuarter : "rate-1.75",
+            .oneAndHalf : "rate-1.75",
+            .oneAndThreeQuarters : "rate-1.75",
+            .double : "rate-1.75"
         ]
     }
 
@@ -34,6 +35,6 @@ class PlaybackRateButton: UIButton {
     }
     
     func updateUI() {
-        setImage(UIImage(systemName: Constants.imageAssets[player.rate] ?? "questionmark.circle"), for: .normal)
+        setImage(UIImage(named: Constants.imageAssets[player.rate]!), for: .normal)
     }
 }

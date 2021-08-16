@@ -4,19 +4,16 @@ import AVFoundation
 protocol VideoTherapyPlayerDelegate: AnyObject {
     func refreshAfterRestart(with player: AVPlayer)
     func setUpTimeline(with durations: [CMTime])
-    func updateTimeline(with time: CMTime)
     func updateTimeline(with fraction: Double, at index: Int)
-    func reachedQuestionMark(mark: Int)
+    func onNextPlayerItem(after index: Int)
     func onPlaybackStatusChange()
 }
 
 final class VideoTherapyPlayer: VideoTherapyPlayerProtocol {
-    
     struct Constants {
         static let periodicObservationInterval = CMTime(seconds: 0.5,
                                                         preferredTimescale: CMTimeScale(NSEC_PER_SEC))
     }
-    
     var rate: PlaybackRates {
         didSet {
             if(isPlaying) {
@@ -32,13 +29,11 @@ final class VideoTherapyPlayer: VideoTherapyPlayerProtocol {
     weak var delegate: VideoTherapyPlayerDelegate?
     private(set) var avPlayer: AVQueuePlayer
     private var assets: [AVAsset] = []
-    private var questionMarks: [CMTime] = []
     private var playerStatusObserver: NSKeyValueObservation?
     private var playerItemStatusObserver: NSKeyValueObservation?
     private var playerQueueObserver: NSKeyValueObservation?
     private var playerPlaybackStatusObserver: NSKeyValueObservation?
     private var periodicTimeObserver: Any?
-    private var boundaryTimeObserver: Any?
     
     init() {
         avPlayer = AVQueuePlayer()
@@ -124,7 +119,6 @@ fileprivate extension VideoTherapyPlayer {
                 self?.restart()
                 print("playerItem status: [\(String(describing: item.error))]")
             case .readyToPlay:
-                #warning("setUpTimeline somewhere else")
                 print("playerItem status: [.readyToPlay]")
                 self?.play()
             case .unknown:
@@ -136,30 +130,29 @@ fileprivate extension VideoTherapyPlayer {
     }
     
     private func registerPeriodicTimeObserver() {
-        periodicTimeObserver = avPlayer.addPeriodicTimeObserver(forInterval: Constants.periodicObservationInterval,
-                                                                queue: .main) { [weak self] time in
+        periodicTimeObserver = avPlayer.addPeriodicTimeObserver(
+            forInterval: Constants.periodicObservationInterval,
+            queue: .main) { [weak self] time in
             guard let self = self else {
                 return
             }
-            let timeTotal = self.getPlayedTimeBeforeCurrentItem() + time
-            self.delegate?.updateTimeline(with: timeTotal)
-            let fraction = (time.seconds / self.avPlayer.currentItem!.duration.seconds)
+            let itemDuration = self.avPlayer.currentItem?.duration.seconds
+            guard let itemDuration = itemDuration, !itemDuration.isNaN else {
+                return
+            }
+            let fraction = time.seconds / itemDuration
             let index = self.getCurrentItemIndex()
             self.delegate?.updateTimeline(with: fraction, at: index)
         }
     }
     
-    private func registerQuestionMarksObserver() {
-        let values = questionMarks.map { NSValue(time:$0) }
-        boundaryTimeObserver = avPlayer.addBoundaryTimeObserver(forTimes: values,
-                                                                queue: .main) { [weak self] in
-            self?.delegate?.reachedQuestionMark(mark: Int((self?.avPlayer.currentTime().seconds)!))
-        }
-    }
-    
     private func registerCurrentItemObserver() {
-        playerQueueObserver = self.avPlayer.observe(\.currentItem, options: [.new]) { [weak self] player, _ in
-            #warning("notify viewModel about next play item")
+        playerQueueObserver = self.avPlayer.observe(\.currentItem, options: [.new]) { [weak self] _, _ in
+            guard let self = self else {
+                return
+            }
+            let index = self.getCurrentItemIndex()
+            self.delegate?.onNextPlayerItem(after: index)
         }
     }
     
@@ -184,12 +177,10 @@ fileprivate extension VideoTherapyPlayer {
         playerPlaybackStatusObserver = nil
         
         periodicTimeObserver = nil
-        boundaryTimeObserver = nil
     }
 }
 
 //MARK: - VideoTherapyPlayerProtocol conformation
-
 extension VideoTherapyPlayer {
     func enableSubtitles() {
         // later
@@ -200,27 +191,15 @@ extension VideoTherapyPlayer {
     }
         
     func seek(by offset: TimeInterval) {
-        let isNegative = offset < 0
         let cmCurrent = avPlayer.currentTime()
-        let cmOffset = CMTime(seconds: isNegative ? -offset : offset,
-                                preferredTimescale: cmCurrent.timescale)
-        let cmTarget = isNegative ? cmCurrent - cmOffset : cmCurrent + cmOffset
-        seek(to: cmTarget.seconds)
+        let cmOffset = CMTime(seconds: abs(offset), preferredTimescale: cmCurrent.timescale)
+        let cmTarget = offset < 0 ? cmCurrent - cmOffset : cmCurrent + cmOffset
+        seek(to: cmTarget)
     }
     
-    func seek(to time: TimeInterval) {
-        let itemDuration = avPlayer.currentItem?.duration ?? .zero
-        let seekTime = CMTime(seconds: Double(time),
-                             preferredTimescale: avPlayer.currentTime().timescale)
-        let itemSeekTime = seekTime - getPlayedTimeBeforeCurrentItem()
-        var resultTime: CMTime = itemSeekTime
-        if itemSeekTime < .zero {
-            resultTime = .zero
-        }
-        else if itemSeekTime > itemDuration {
-            resultTime = itemDuration
-        }
-        avPlayer.seek(to: resultTime)
+    func seek(to time: CMTime) {
+        avPlayer.seek(to: time, toleranceBefore: .zero, toleranceAfter: .positiveInfinity)
+        avPlayer.play()
     }
 
     func play() {
@@ -235,11 +214,5 @@ extension VideoTherapyPlayer {
     
     func togglePlayPause() {
         isPlaying ? pause() : play()
-    }
-    
-    func set(marks: [Int]) {
-        let timescale = avPlayer.currentTime().timescale
-        questionMarks = marks.map { CMTime(seconds: Double($0), preferredTimescale: timescale)}
-        registerQuestionMarksObserver()
     }
 }

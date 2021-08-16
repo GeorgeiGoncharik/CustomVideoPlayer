@@ -5,6 +5,7 @@ class TherapyCoordinator {
     
     init(navigationController: UINavigationController) {
         self.navigationController = navigationController
+        navigationController.isNavigationBarHidden = true
         start()
     }
     

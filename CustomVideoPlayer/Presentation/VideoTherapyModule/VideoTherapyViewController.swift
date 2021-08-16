@@ -14,8 +14,10 @@ class VideoTherapyViewController: UIViewController {
         view.addSubview(playerView)
         playerView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            playerView.heightAnchor.constraint(equalTo: view.heightAnchor),
-            playerView.widthAnchor.constraint(equalTo: view.widthAnchor)
+            playerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            playerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            playerView.topAnchor.constraint(equalTo: view.topAnchor),
+            playerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
 
