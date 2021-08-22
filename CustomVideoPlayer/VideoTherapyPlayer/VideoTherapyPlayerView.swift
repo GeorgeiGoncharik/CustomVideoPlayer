@@ -43,6 +43,10 @@ class VideoTherapyPlayerView: UIView {
     private var timelineView = VideoTherapyTimelineView()
     // close button
     private var closeButton = UIButton()
+    // subtitles text view
+    private var subtitlesTextView = UITextView()
+    // loader
+    private var loaderView = UIActivityIndicatorView(style: .large)
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -55,6 +59,11 @@ class VideoTherapyPlayerView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func configure(with urls: [URL]) {
+        player.configure(with: urls)
+        player.play()
+    }
+    
     private func initView() {
         playerLayer.player = player.avPlayer
         #warning("set to .resize")
@@ -63,6 +72,8 @@ class VideoTherapyPlayerView: UIView {
         setUpAdditionalControls()
         setUpProgressView()
         setUpCloseButton()
+        setUpSubtitlesTextView()
+        setUpLoaderView()
     }
     
     private func initTouchRecognizer() {
@@ -214,13 +225,24 @@ class VideoTherapyPlayerView: UIView {
         NSLayoutConstraint.activate([
             timelineView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: Constants.horizontalPadding),
             timelineView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: -Constants.horizontalPadding),
-            timelineView.bottomAnchor.constraint(equalTo: mainControlsStack.topAnchor, constant: -Constants.smallVeticalPadding)
+            timelineView.bottomAnchor.constraint(equalTo: mainControlsStack.topAnchor, constant: -Constants.smallVeticalPadding),
         ])
     }
     
-    func configure(with urls: [URL]) {
-        player.configure(with: urls)
-        player.play()
+    private func setUpSubtitlesTextView() {
+        
+    }
+    
+    private func setUpLoaderView() {
+        addSubview(loaderView)
+        loaderView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            loaderView.widthAnchor.constraint(equalToConstant: 32),
+            loaderView.heightAnchor.constraint(equalTo: loaderView.widthAnchor),
+            loaderView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            loaderView.centerYAnchor.constraint(equalTo: centerYAnchor)
+        ])
+        loaderView.isHidden = true
     }
     
     private func toggleControls() {
@@ -239,11 +261,11 @@ class VideoTherapyPlayerView: UIView {
 //MARK: -Selectors
 extension VideoTherapyPlayerView {
     @objc private func onTextTherapyTapped() {
-        player.seek(to: player.avPlayer.currentItem?.duration ?? .positiveInfinity)
+        player.seek(.end)
     }
     
     @objc private func onSubtitlesTapped() {
-        #warning("add code here")
+        player.toggleSubtitles()
     }
     
     @objc private func onBackgroundMusicTapped() {
@@ -261,6 +283,20 @@ extension VideoTherapyPlayerView {
 }
 
 extension VideoTherapyPlayerView: VideoTherapyPlayerDelegate {
+    func onShowLoader() {
+        loaderView.isHidden = false
+        loaderView.startAnimating()
+    }
+    
+    func onHideLoader() {
+        loaderView.stopAnimating()
+        loaderView.isHidden = true
+    }
+    
+    func onSubtitleTextChange(with text: String) {
+        subtitlesTextView.text = text
+    }
+    
     func updateTimeline(with fraction: Double, at index: Int) {
         timelineView.updateUI(with: fraction, at: index)
     }
@@ -270,7 +306,6 @@ extension VideoTherapyPlayerView: VideoTherapyPlayerDelegate {
     }
     
     func onNextPlayerItem(after index: Int) {
-        player.pause()
         delegate?.onTextTherapy(after: index)
     }
         

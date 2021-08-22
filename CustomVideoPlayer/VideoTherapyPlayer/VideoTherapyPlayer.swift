@@ -7,9 +7,12 @@ protocol VideoTherapyPlayerDelegate: AnyObject {
     func updateTimeline(with fraction: Double, at index: Int)
     func onNextPlayerItem(after index: Int)
     func onPlaybackStatusChange()
+    func onSubtitleTextChange(with text: String)
+    func onShowLoader()
+    func onHideLoader()
 }
 
-final class VideoTherapyPlayer: VideoTherapyPlayerProtocol {
+final class VideoTherapyPlayer: NSObject, VideoTherapyPlayerProtocol {
     struct Constants {
         static let periodicObservationInterval = CMTime(seconds: 0.5,
                                                         preferredTimescale: CMTimeScale(NSEC_PER_SEC))
@@ -26,18 +29,30 @@ final class VideoTherapyPlayer: VideoTherapyPlayerProtocol {
             avPlayer.rate != 0 && avPlayer.error == nil
         }
     }
+    private var isStall: Bool = true {
+        didSet {
+            isStall ? delegate?.onShowLoader() : delegate?.onHideLoader()
+        }
+    }
     weak var delegate: VideoTherapyPlayerDelegate?
     private(set) var avPlayer: AVQueuePlayer
+    private var isSeekInProgress = false
+    private var isEnabledSubtitles = false
+    private var isFirstItem = true
     private var assets: [AVAsset] = []
     private var playerStatusObserver: NSKeyValueObservation?
     private var playerItemStatusObserver: NSKeyValueObservation?
     private var playerQueueObserver: NSKeyValueObservation?
     private var playerPlaybackStatusObserver: NSKeyValueObservation?
+    private var isPlaybackBufferEmptyObserver: NSKeyValueObservation?
+    private var isPlaybackBufferFullObserver: NSKeyValueObservation?
+    private var isPlaybackLikelyToKeepUpObserver: NSKeyValueObservation?
     private var periodicTimeObserver: Any?
     
-    init() {
+    override init() {
         avPlayer = AVQueuePlayer()
         rate = .one
+        super.init()
         registerObservers()
     }
     
@@ -46,7 +61,12 @@ final class VideoTherapyPlayer: VideoTherapyPlayerProtocol {
     }
     
     func configure(with urls: [URL]) {
-        assets = urls.map { url in AVAsset(url: url) }
+        assets = urls.map { url in
+            let asset = AVAsset(url: url)
+            let chars = asset.mediaSelectionGroup(forMediaCharacteristic: .legible)
+            print (chars)
+            return asset
+        }
         setUpPlayerItems()
     }
         
@@ -83,6 +103,18 @@ final class VideoTherapyPlayer: VideoTherapyPlayerProtocol {
         }
         return playedTime
     }
+    
+    private func seek(to time: CMTime) {
+        guard !isSeekInProgress, avPlayer.status == .readyToPlay else {
+            return
+        }
+        isSeekInProgress = true
+        avPlayer.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero) { [weak self] _ in
+            guard let self = self else { return }
+            self.isSeekInProgress = false
+            self.avPlayer.play()
+        }
+    }
 }
 
 //MARK: - Observations
@@ -94,6 +126,7 @@ fileprivate extension VideoTherapyPlayer {
         registerPeriodicTimeObserver()
         registerCurrentItemObserver()
         registerPlaybackStatusObserver()
+        registerBufferingObservers()
     }
     
     private func registerPlayerStatusObserver() {
@@ -151,6 +184,15 @@ fileprivate extension VideoTherapyPlayer {
             guard let self = self else {
                 return
             }
+            self.isSeekInProgress = false
+            let captionOutput = AVPlayerItemLegibleOutput()
+            captionOutput.setDelegate(self, queue: .main)
+            self.avPlayer.currentItem?.add(captionOutput)
+            if self.isFirstItem {
+                self.isFirstItem = false
+                return
+            }
+            self.avPlayer.pause()
             let index = self.getCurrentItemIndex()
             self.delegate?.onNextPlayerItem(after: index)
         }
@@ -160,6 +202,29 @@ fileprivate extension VideoTherapyPlayer {
         self.playerPlaybackStatusObserver = avPlayer.observe(\.timeControlStatus,
                                                              options: [.new, .old]) { [weak self] _, _ in
             self?.delegate?.onPlaybackStatusChange()
+        }
+    }
+    
+    private func registerBufferingObservers() {
+        self.isPlaybackBufferFullObserver = avPlayer.currentItem?.observe(\.isPlaybackBufferFull, options: [.new]) { [weak self] _, change in
+            guard let self = self, let isFull = change.newValue else {
+                return
+            }
+            self.isStall = !isFull
+        }
+        
+        self.isPlaybackBufferEmptyObserver = avPlayer.currentItem?.observe(\.isPlaybackBufferEmpty, options: [.new]) { [weak self] _, change in
+            guard let self = self, let isEmpty = change.newValue else {
+                return
+            }
+            self.isStall = isEmpty
+        }
+        
+        self.isPlaybackLikelyToKeepUpObserver = avPlayer.currentItem?.observe(\.isPlaybackLikelyToKeepUp, options: [.new]) { [weak self] _, change in
+            guard let self = self, let isKeepUp = change.newValue else {
+                return
+            }
+            self.isStall = !isKeepUp
         }
     }
     
@@ -177,29 +242,52 @@ fileprivate extension VideoTherapyPlayer {
         playerPlaybackStatusObserver = nil
         
         periodicTimeObserver = nil
+        
+        isPlaybackBufferEmptyObserver?.invalidate()
+        isPlaybackBufferEmptyObserver = nil
+        isPlaybackBufferFullObserver?.invalidate()
+        isPlaybackBufferFullObserver = nil
+        isPlaybackLikelyToKeepUpObserver?.invalidate()
+        isPlaybackLikelyToKeepUpObserver = nil
     }
 }
 
 //MARK: - VideoTherapyPlayerProtocol conformation
 extension VideoTherapyPlayer {
-    func enableSubtitles() {
-        // later
-    }
-    
-    func disableSubtitles() {
-        // later
+    func toggleSubtitles() {
+        isEnabledSubtitles.toggle()
+        if let mediaSelectionGroup = avPlayer.currentItem?.asset.mediaSelectionGroup(forMediaCharacteristic: .legible) {
+            avPlayer.currentItem?.select(isEnabledSubtitles ? mediaSelectionGroup.options[0] : nil, in: mediaSelectionGroup)
+        }
     }
         
-    func seek(by offset: TimeInterval) {
-        let cmCurrent = avPlayer.currentTime()
-        let cmOffset = CMTime(seconds: abs(offset), preferredTimescale: cmCurrent.timescale)
-        let cmTarget = offset < 0 ? cmCurrent - cmOffset : cmCurrent + cmOffset
-        seek(to: cmTarget)
-    }
-    
-    func seek(to time: CMTime) {
-        avPlayer.seek(to: time, toleranceBefore: .zero, toleranceAfter: .positiveInfinity)
-        avPlayer.play()
+    func seek(_ type: SeekType) {
+        switch type {
+        case .start:
+            let time: CMTime = .zero
+            seek(to: time)
+        case .end:
+            guard let duration = avPlayer.currentItem?.duration else {
+                return
+            }
+            seek(to: duration)
+        case .offset(let interval):
+            guard let duration = avPlayer.currentItem?.duration else {
+                return
+            }
+            let current = avPlayer.currentTime()
+            let offset = CMTime(seconds: abs(interval), preferredTimescale: current.timescale)
+            let time = interval < 0 ? current - offset : current + offset
+            if time > duration {
+                seek(.end)
+            } else if time < .zero {
+                seek(.start)
+            } else {
+                seek(to: time)
+            }
+        case .time(let time):
+            seek(to: time)
+        }
     }
 
     func play() {
@@ -214,5 +302,19 @@ extension VideoTherapyPlayer {
     
     func togglePlayPause() {
         isPlaying ? pause() : play()
+    }
+}
+
+//MARK:- AVPlayerItemLegibleOutputPushDelegate conformation. Subtitles
+extension VideoTherapyPlayer: AVPlayerItemLegibleOutputPushDelegate {
+    func legibleOutput(_ output: AVPlayerItemLegibleOutput,
+                       didOutputAttributedStrings strings: [NSAttributedString],
+                       nativeSampleBuffers nativeSamples: [Any],
+                       forItemTime itemTime: CMTime) {
+        print(strings)
+        guard let string = strings.first?.string else {
+            return
+        }
+        delegate?.onSubtitleTextChange(with: string)
     }
 }

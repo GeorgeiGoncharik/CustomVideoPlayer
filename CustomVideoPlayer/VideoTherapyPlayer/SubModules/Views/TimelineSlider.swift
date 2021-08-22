@@ -122,6 +122,7 @@ class VideoTherapyTimelineView: UIView {
     private func freeStack() {
         stack.arrangedSubviews.forEach { [weak self] view in
             self?.stack.removeArrangedSubview(view)
+            view.removeFromSuperview()
         }
     }
 }

@@ -19,6 +19,6 @@ class RewindButton: UIButton {
     }
     
     @objc func onTap() {
-        player.seek(by: rewindInterval)
+        player.seek(.offset(rewindInterval))
     }
 }

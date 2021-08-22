@@ -10,8 +10,6 @@ protocol VideoTherapyPlayerProtocol: AnyObject {
     func play()
     func pause()
     func togglePlayPause()
-    func seek(to time: CMTime)
-    func seek(by offset: TimeInterval)
-    func enableSubtitles()
-    func disableSubtitles()
+    func seek(_: SeekType)
+    func toggleSubtitles()
 }

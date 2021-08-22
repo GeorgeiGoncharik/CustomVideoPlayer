@@ -23,6 +23,7 @@
 		0477DE1F26C3268900D670FE /* VideoTherapyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0477DE1C26C3268900D670FE /* VideoTherapyViewController.swift */; };
 		0477DE2126C3292B00D670FE /* TherapyCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0477DE2026C3292B00D670FE /* TherapyCoordinator.swift */; };
 		0477DE2426C32A6700D670FE /* TherapyQuestionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0477DE2326C32A6700D670FE /* TherapyQuestionViewController.swift */; };
+		0487509426CD64AC009F3989 /* SeekType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0487509326CD64AB009F3989 /* SeekType.swift */; };
 		0495E99F26C8877200BE9AE7 /* RewindButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0495E99E26C8877200BE9AE7 /* RewindButton.swift */; };
 /* End PBXBuildFile section */
 
@@ -45,6 +46,7 @@
 		0477DE1C26C3268900D670FE /* VideoTherapyViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoTherapyViewController.swift; sourceTree = "<group>"; };
 		0477DE2026C3292B00D670FE /* TherapyCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TherapyCoordinator.swift; sourceTree = "<group>"; };
 		0477DE2326C32A6700D670FE /* TherapyQuestionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TherapyQuestionViewController.swift; sourceTree = "<group>"; };
+		0487509326CD64AB009F3989 /* SeekType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeekType.swift; sourceTree = "<group>"; };
 		0495E99E26C8877200BE9AE7 /* RewindButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewindButton.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -103,6 +105,7 @@
 		043A3C9026BF0E9800748E3B /* SubModules */ = {
 			isa = PBXGroup;
 			children = (
+				0487509226CD6491009F3989 /* Helpers */,
 				043A3C9C26C2ECDE00748E3B /* Views */,
 				043A3C9D26C2ECEA00748E3B /* PlaybackRates.swift */,
 			);
@@ -144,6 +147,14 @@
 				0477DE2326C32A6700D670FE /* TherapyQuestionViewController.swift */,
 			);
 			path = TherapyQuestionModule;
+			sourceTree = "<group>";
+		};
+		0487509226CD6491009F3989 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				0487509326CD64AB009F3989 /* SeekType.swift */,
+			);
+			path = Helpers;
 			sourceTree = "<group>";
 		};
 		0495E99D26C8874600BE9AE7 /* MainControls */ = {
@@ -228,6 +239,7 @@
 				043A3C9226BF0EDD00748E3B /* PlaybackButton.swift in Sources */,
 				043A3C9626C1DA6A00748E3B /* TimelineSlider.swift in Sources */,
 				0477DE2126C3292B00D670FE /* TherapyCoordinator.swift in Sources */,
+				0487509426CD64AC009F3989 /* SeekType.swift in Sources */,
 				043A3C9E26C2ECEA00748E3B /* PlaybackRates.swift in Sources */,
 				043A3C9426C1829900748E3B /* VideoTherapyPlayer.swift in Sources */,
 				043A3C7826BDADC200748E3B /* AppDelegate.swift in Sources */,
