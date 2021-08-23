@@ -242,7 +242,7 @@ class VideoTherapyPlayerView: UIView {
             loaderView.centerXAnchor.constraint(equalTo: centerXAnchor),
             loaderView.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
-        loaderView.isHidden = true
+        loaderView.startAnimating()
     }
     
     private func toggleControls() {
